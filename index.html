@@ -336,11 +336,15 @@
         // 存储用户数据
         let users = [];
         
+        // Gist ID - 用于存储共享数据
+        const GIST_ID = 'your-gist-id'; // 替换为实际的Gist ID
+        const GIST_URL = `https://api.github.com/gists/${GIST_ID}`;
+        
         // 初始化
-        function init() {
-            // 从URL参数加载数据（如果有）
-            loadFromUrl();
-            // 从LocalStorage加载数据（如果没有URL参数）
+        async function init() {
+            // 尝试从Gist加载数据
+            await loadFromGist();
+            // 如果Gist加载失败，从LocalStorage加载
             if (users.length === 0) {
                 loadFromLocalStorage();
             }
@@ -352,19 +356,43 @@
             updateShareLink();
         }
         
-        // 从URL参数加载数据
-        function loadFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const dataParam = urlParams.get('data');
-            if (dataParam) {
-                try {
-                    const decodedData = decodeURIComponent(dataParam);
-                    users = JSON.parse(decodedData);
+        // 从Gist加载数据
+        async function loadFromGist() {
+            try {
+                const response = await fetch(GIST_URL);
+                if (response.ok) {
+                    const data = await response.json();
+                    const content = data.files['users.json'].content;
+                    users = JSON.parse(content);
                     // 同时保存到LocalStorage
                     saveToLocalStorage();
-                } catch (e) {
-                    console.error('Failed to load data from URL:', e);
                 }
+            } catch (error) {
+                console.error('Failed to load data from Gist:', error);
+            }
+        }
+        
+        // 保存数据到Gist
+        async function saveToGist() {
+            try {
+                const response = await fetch(GIST_URL, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: {
+                            'users.json': {
+                                content: JSON.stringify(users)
+                            }
+                        }
+                    })
+                });
+                if (!response.ok) {
+                    console.error('Failed to save data to Gist:', response.status);
+                }
+            } catch (error) {
+                console.error('Failed to save data to Gist:', error);
             }
         }
         
@@ -402,16 +430,17 @@
         }
         
         // 清空所有数据
-        function clearAll() {
+        async function clearAll() {
             users = [];
             saveToLocalStorage();
+            await saveToGist();
             renderUsers();
             calculateResults();
             updateShareLink();
         }
         
         // 处理表单提交
-        document.getElementById('userForm').addEventListener('submit', function(e) {
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const nickname = document.getElementById('nickname').value;
@@ -424,8 +453,10 @@
             document.getElementById('nickname').value = '';
             document.getElementById('value').value = '';
             
-            // 保存到LocalStorage
+            // 保存到LocalStorage和Gist
             saveToLocalStorage();
+            await saveToGist();
+            
             // 渲染用户列表
             renderUsers();
             // 计算结果
@@ -452,9 +483,10 @@
         }
         
         // 删除用户
-        function removeUser(index) {
+        async function removeUser(index) {
             users.splice(index, 1);
             saveToLocalStorage();
+            await saveToGist();
             renderUsers();
             calculateResults();
             updateShareLink();
