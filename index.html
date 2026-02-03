@@ -322,6 +322,14 @@
             <div id="results"></div>
         </div>
         
+        <!-- Token输入部分 -->
+        <div class="input-section">
+            <h2>GitHub Token设置</h2>
+            <p>请输入您的GitHub Personal Access Token以提高API速率限制：</p>
+            <input type="password" id="githubToken" placeholder="输入GitHub Personal Access Token" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <button onclick="setGitHubToken()" style="padding: 10px 20px; background-color: #008CBA; color: white; border: none; border-radius: 4px; cursor: pointer;">设置Token</button>
+        </div>
+        
         <!-- 分享部分 -->
         <div class="share-section">
             <h2>分享链接</h2>
@@ -338,11 +346,13 @@
         
         // Gist ID - 用于存储共享数据
         const GIST_ID = '74c1c1b591014c5fff3b9b0ffedf9b6d'; // 替换为实际的Gist ID
-        const GITHUB_TOKEN = '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'; // 替换为实际的GitHub Personal Access Token
+        let GITHUB_TOKEN = ''; // 从用户输入获取
         const GIST_URL = `https://api.github.com/gists/${GIST_ID}`;
         
         // 初始化
         async function init() {
+            // 从LocalStorage加载Token
+            loadGitHubToken();
             // 尝试从Gist加载数据
             const success = await loadFromGist();
             if (!success) {
@@ -431,6 +441,31 @@
                 console.error('保存数据到Gist异常:', error);
                 alert(`保存数据到Gist失败：${error.message}\n请检查网络连接和Gist权限。`);
                 return false;
+            }
+        }
+        
+        // 设置GitHub Token
+        function setGitHubToken() {
+            const tokenInput = document.getElementById('githubToken');
+            const token = tokenInput.value.trim();
+            
+            if (token) {
+                GITHUB_TOKEN = token;
+                localStorage.setItem('githubToken', token);
+                alert('GitHub Token设置成功！');
+                // 重新加载数据
+                init();
+            } else {
+                alert('请输入有效的GitHub Token！');
+            }
+        }
+        
+        // 从LocalStorage加载Token
+        function loadGitHubToken() {
+            const storedToken = localStorage.getItem('githubToken');
+            if (storedToken) {
+                GITHUB_TOKEN = storedToken;
+                document.getElementById('githubToken').value = storedToken;
             }
         }
         
