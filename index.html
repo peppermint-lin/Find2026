@@ -362,7 +362,7 @@
                 const response = await fetch(GIST_URL);
                 if (response.ok) {
                     const data = await response.json();
-                    const content = data.files['users.json'].content;
+                    const content = data.files['user.json'].content;
                     users = JSON.parse(content);
                     // 同时保存到LocalStorage
                     saveToLocalStorage();
