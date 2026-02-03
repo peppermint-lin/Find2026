@@ -337,7 +337,8 @@
         let users = [];
         
         // Gist ID - 用于存储共享数据
-        const GIST_ID = '3c6d17ab4ac2956c846569941d92d528'; // 替换为实际的Gist ID
+        const GIST_ID = '74c1c1b591014c5fff3b9b0ffedf9b6d'; // 替换为实际的Gist ID
+        const GITHUB_TOKEN = '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'; // 替换为实际的GitHub Personal Access Token
         const GIST_URL = `https://api.github.com/gists/${GIST_ID}`;
         
         // 初始化
@@ -358,7 +359,19 @@
         // 从Gist加载数据
         async function loadFromGist() {
             try {
-                const response = await fetch(GIST_URL);
+                const headers = {
+                    'Accept': 'application/vnd.github.v3+json'
+                };
+                
+                // 如果提供了GitHub Token，添加认证头
+                if (GITHUB_TOKEN && GITHUB_TOKEN !== 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN') {
+                    headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+                }
+                
+                const response = await fetch(GIST_URL, {
+                    headers: headers
+                });
+                
                 if (response.ok) {
                     const data = await response.json();
                     if (data.files && data.files['user.json']) {
@@ -370,12 +383,14 @@
                         return false;
                     }
                 } else {
-                    alert(`从Gist加载数据失败：${response.status} ${response.statusText}`);
+                    const errorText = await response.text();
+                    console.error('Gist加载失败:', errorText);
+                    alert(`从Gist加载数据失败：${response.status} ${response.statusText}\n${errorText}`);
                     return false;
                 }
             } catch (error) {
-                alert(`从Gist加载数据失败：${error.message}`);
-                console.error('Failed to load data from Gist:', error);
+                console.error('从Gist加载数据异常:', error);
+                alert(`从Gist加载数据失败：${error.message}\n请检查网络连接和Gist ID是否正确。`);
                 return false;
             }
         }
@@ -383,12 +398,19 @@
         // 保存数据到Gist
         async function saveToGist() {
             try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json'
+                };
+                
+                // 如果提供了GitHub Token，添加认证头
+                if (GITHUB_TOKEN && GITHUB_TOKEN !== 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN') {
+                    headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+                }
+                
                 const response = await fetch(GIST_URL, {
                     method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         files: {
                             'user.json': {
@@ -400,13 +422,14 @@
                 if (response.ok) {
                     return true;
                 } else {
-                    alert(`保存数据到Gist失败：${response.status} ${response.statusText}`);
-                    console.error('Failed to save data to Gist:', response.status, await response.text());
+                    const errorText = await response.text();
+                    console.error('Gist保存失败:', errorText);
+                    alert(`保存数据到Gist失败：${response.status} ${response.statusText}\n${errorText}`);
                     return false;
                 }
             } catch (error) {
-                alert(`保存数据到Gist失败：${error.message}`);
-                console.error('Failed to save data to Gist:', error);
+                console.error('保存数据到Gist异常:', error);
+                alert(`保存数据到Gist失败：${error.message}\n请检查网络连接和Gist权限。`);
                 return false;
             }
         }
