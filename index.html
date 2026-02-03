@@ -343,10 +343,9 @@
         // 初始化
         async function init() {
             // 尝试从Gist加载数据
-            await loadFromGist();
-            // 如果Gist加载失败，从LocalStorage加载
-            if (users.length === 0) {
-                loadFromLocalStorage();
+            const success = await loadFromGist();
+            if (!success) {
+                alert('初始化失败：无法从Gist加载数据，请检查网络连接和Gist ID是否正确。');
             }
             // 渲染用户列表
             renderUsers();
@@ -362,13 +361,22 @@
                 const response = await fetch(GIST_URL);
                 if (response.ok) {
                     const data = await response.json();
-                    const content = data.files['user.json'].content;
-                    users = JSON.parse(content);
-                    // 同时保存到LocalStorage
-                    saveToLocalStorage();
+                    if (data.files && data.files['user.json']) {
+                        const content = data.files['user.json'].content;
+                        users = JSON.parse(content);
+                        return true;
+                    } else {
+                        alert('Gist中缺少user.json文件，请检查Gist配置。');
+                        return false;
+                    }
+                } else {
+                    alert(`从Gist加载数据失败：${response.status} ${response.statusText}`);
+                    return false;
                 }
             } catch (error) {
+                alert(`从Gist加载数据失败：${error.message}`);
                 console.error('Failed to load data from Gist:', error);
+                return false;
             }
         }
         
@@ -378,7 +386,8 @@
                 const response = await fetch(GIST_URL, {
                     method: 'PATCH',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
                     },
                     body: JSON.stringify({
                         files: {
@@ -388,30 +397,18 @@
                         }
                     })
                 });
-                if (!response.ok) {
-                    console.error('Failed to save data to Gist:', response.status);
+                if (response.ok) {
+                    return true;
+                } else {
+                    alert(`保存数据到Gist失败：${response.status} ${response.statusText}`);
+                    console.error('Failed to save data to Gist:', response.status, await response.text());
+                    return false;
                 }
             } catch (error) {
+                alert(`保存数据到Gist失败：${error.message}`);
                 console.error('Failed to save data to Gist:', error);
+                return false;
             }
-        }
-        
-        // 从LocalStorage加载数据
-        function loadFromLocalStorage() {
-            const storedUsers = localStorage.getItem('2026FinderUsers');
-            if (storedUsers) {
-                try {
-                    users = JSON.parse(storedUsers);
-                } catch (e) {
-                    console.error('Failed to load data from LocalStorage:', e);
-                    users = [];
-                }
-            }
-        }
-        
-        // 保存数据到LocalStorage
-        function saveToLocalStorage() {
-            localStorage.setItem('2026FinderUsers', JSON.stringify(users));
         }
         
         // 更新分享链接
@@ -432,11 +429,12 @@
         // 清空所有数据
         async function clearAll() {
             users = [];
-            saveToLocalStorage();
-            await saveToGist();
-            renderUsers();
-            calculateResults();
-            updateShareLink();
+            const success = await saveToGist();
+            if (success) {
+                renderUsers();
+                calculateResults();
+                updateShareLink();
+            }
         }
         
         // 处理表单提交
@@ -446,6 +444,11 @@
             const nickname = document.getElementById('nickname').value;
             const value = parseInt(document.getElementById('value').value);
             
+            if (!nickname || isNaN(value)) {
+                alert('请输入有效的昵称和数值。');
+                return;
+            }
+            
             // 添加用户
             users.push({ nickname, value });
             
@@ -453,16 +456,19 @@
             document.getElementById('nickname').value = '';
             document.getElementById('value').value = '';
             
-            // 保存到LocalStorage和Gist
-            saveToLocalStorage();
-            await saveToGist();
-            
-            // 渲染用户列表
-            renderUsers();
-            // 计算结果
-            calculateResults();
-            // 更新分享链接
-            updateShareLink();
+            // 保存到Gist
+            const success = await saveToGist();
+            if (success) {
+                // 渲染用户列表
+                renderUsers();
+                // 计算结果
+                calculateResults();
+                // 更新分享链接
+                updateShareLink();
+            } else {
+                // 如果保存失败，撤销添加操作
+                users.pop();
+            }
         });
         
         // 渲染用户列表
@@ -484,12 +490,22 @@
         
         // 删除用户
         async function removeUser(index) {
+            // 保存要删除的用户，以便在保存失败时恢复
+            const removedUser = users[index];
+            // 从数组中删除用户
             users.splice(index, 1);
-            saveToLocalStorage();
-            await saveToGist();
-            renderUsers();
-            calculateResults();
-            updateShareLink();
+            
+            // 保存到Gist
+            const success = await saveToGist();
+            if (success) {
+                renderUsers();
+                calculateResults();
+                updateShareLink();
+            } else {
+                // 如果保存失败，恢复删除的用户
+                users.splice(index, 0, removedUser);
+                renderUsers();
+            }
         }
         
         // 计算结果
