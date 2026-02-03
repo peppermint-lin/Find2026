@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026组合查找器</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .input-section:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: bold;
+        }
+        
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            align-self: flex-end;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .users-section {
+            margin-bottom: 30px;
+        }
+        
+        .users-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .user-card {
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-radius: 4px;
+            border: 1px solid #b0e0e6;
+            min-width: 150px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .user-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .user-card h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .user-card p {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .user-card button {
+            padding: 5px 10px;
+            font-size: 12px;
+            background-color: #f44336;
+            margin-top: 5px;
+            align-self: flex-start;
+        }
+        
+        .user-card button:hover {
+            background-color: #da190b;
+        }
+        
+        .results-section {
+            margin-bottom: 30px;
+        }
+        
+        .result-item {
+            padding: 15px;
+            background-color: #f0fff0;
+            border-radius: 4px;
+            border: 1px solid #90ee90;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .result-item p {
+            margin-bottom: 5px;
+        }
+        
+        .share-section {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .share-section:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .share-link {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            word-break: break-all;
+            transition: all 0.3s ease;
+        }
+        
+        .share-link:focus {
+            outline: none;
+            border-color: #008CBA;
+            box-shadow: 0 0 0 2px rgba(0, 140, 186, 0.2);
+        }
+        
+        .copy-button {
+            padding: 5px 10px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-button:hover {
+            background-color: #007bb5;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .clear-button {
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .clear-button:hover {
+            background-color: #da190b;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            button {
+                align-self: stretch;
+            }
+            
+            .user-card {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>2026组合查找器</h1>
+        
+        <!-- 输入部分 -->
+        <div class="input-section">
+            <h2>输入你的昵称和数值</h2>
+            <form id="userForm">
+                <div class="form-group">
+                    <label for="nickname">昵称：</label>
+                    <input type="text" id="nickname" required>
+                </div>
+                <div class="form-group">
+                    <label for="value">数值：</label>
+                    <input type="number" id="value" required min="1">
+                </div>
+                <button type="submit">添加</button>
+            </form>
+        </div>
+        
+        <!-- 用户列表部分 -->
+        <div class="users-section">
+            <h2>已添加的用户</h2>
+            <div class="users-list" id="usersList"></div>
+        </div>
+        
+        <!-- 结果部分 -->
+        <div class="results-section">
+            <h2>符合条件的组合（三个数相加等于2026）</h2>
+            <div id="results"></div>
+        </div>
+        
+        <!-- 分享部分 -->
+        <div class="share-section">
+            <h2>分享链接</h2>
+            <p>复制以下链接分享给朋友，一起编辑和查看结果：</p>
+            <input type="text" class="share-link" id="shareLink" readonly>
+            <button class="copy-button" onclick="copyShareLink()">复制链接</button>
+            <button class="clear-button" onclick="clearAll()">清空所有数据</button>
+        </div>
+    </div>
+    
+    <script>
+        // 存储用户数据
+        let users = [];
+        
+        // 初始化
+        function init() {
+            // 从URL参数加载数据（如果有）
+            loadFromUrl();
+            // 从LocalStorage加载数据（如果没有URL参数）
+            if (users.length === 0) {
+                loadFromLocalStorage();
+            }
+            // 渲染用户列表
+            renderUsers();
+            // 计算结果
+            calculateResults();
+            // 更新分享链接
+            updateShareLink();
+        }
+        
+        // 从URL参数加载数据
+        function loadFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataParam = urlParams.get('data');
+            if (dataParam) {
+                try {
+                    const decodedData = decodeURIComponent(dataParam);
+                    users = JSON.parse(decodedData);
+                    // 同时保存到LocalStorage
+                    saveToLocalStorage();
+                } catch (e) {
+                    console.error('Failed to load data from URL:', e);
+                }
+            }
+        }
+        
+        // 从LocalStorage加载数据
+        function loadFromLocalStorage() {
+            const storedUsers = localStorage.getItem('2026FinderUsers');
+            if (storedUsers) {
+                try {
+                    users = JSON.parse(storedUsers);
+                } catch (e) {
+                    console.error('Failed to load data from LocalStorage:', e);
+                    users = [];
+                }
+            }
+        }
+        
+        // 保存数据到LocalStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('2026FinderUsers', JSON.stringify(users));
+        }
+        
+        // 更新分享链接
+        function updateShareLink() {
+            const dataStr = JSON.stringify(users);
+            const encodedData = encodeURIComponent(dataStr);
+            const shareLink = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
+            document.getElementById('shareLink').value = shareLink;
+        }
+        
+        // 复制分享链接
+        function copyShareLink() {
+            const shareLinkInput = document.getElementById('shareLink');
+            shareLinkInput.select();
+            document.execCommand('copy');
+            alert('链接已复制到剪贴板！');
+        }
+        
+        // 清空所有数据
+        function clearAll() {
+            users = [];
+            saveToLocalStorage();
+            renderUsers();
+            calculateResults();
+            updateShareLink();
+        }
+        
+        // 处理表单提交
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nickname = document.getElementById('nickname').value;
+            const value = parseInt(document.getElementById('value').value);
+            
+            // 添加用户
+            users.push({ nickname, value });
+            
+            // 清空表单
+            document.getElementById('nickname').value = '';
+            document.getElementById('value').value = '';
+            
+            // 保存到LocalStorage
+            saveToLocalStorage();
+            // 渲染用户列表
+            renderUsers();
+            // 计算结果
+            calculateResults();
+            // 更新分享链接
+            updateShareLink();
+        });
+        
+        // 渲染用户列表
+        function renderUsers() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            
+            users.forEach((user, index) => {
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                userCard.innerHTML = `
+                    <h3>${user.nickname}</h3>
+                    <p>${user.value}</p>
+                    <button onclick="removeUser(${index})" style="padding: 5px 10px; font-size: 12px; background-color: #f44336;">删除</button>
+                `;
+                usersList.appendChild(userCard);
+            });
+        }
+        
+        // 删除用户
+        function removeUser(index) {
+            users.splice(index, 1);
+            saveToLocalStorage();
+            renderUsers();
+            calculateResults();
+            updateShareLink();
+        }
+        
+        // 计算结果
+        function calculateResults() {
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+            
+            if (users.length < 3) {
+                results.innerHTML = '<p>需要至少3个用户才能计算结果。</p>';
+                return;
+            }
+            
+            // 寻找所有三个数相加等于2026的组合
+            const combinations = findCombinations();
+            
+            if (combinations.length === 0) {
+                results.innerHTML = '<p>没有找到符合条件的组合。</p>';
+                return;
+            }
+            
+            // 显示结果
+            combinations.forEach((combination, index) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <h3>组合 ${index + 1}</h3>
+                    <p>${combination[0].nickname}: ${combination[0].value}</p>
+                    <p>${combination[1].nickname}: ${combination[1].value}</p>
+                    <p>${combination[2].nickname}: ${combination[2].value}</p>
+                    <p><strong>总和: ${combination[0].value + combination[1].value + combination[2].value}</strong></p>
+                `;
+                results.appendChild(resultItem);
+            });
+        }
+        
+        // 寻找所有三个数相加等于2026的组合
+        function findCombinations() {
+            const combinations = [];
+            const n = users.length;
+            
+            // 三重循环遍历所有可能的组合
+            for (let i = 0; i < n - 2; i++) {
+                for (let j = i + 1; j < n - 1; j++) {
+                    for (let k = j + 1; k < n; k++) {
+                        if (users[i].value + users[j].value + users[k].value === 2026) {
+                            combinations.push([users[i], users[j], users[k]]);
+                        }
+                    }
+                }
+            }
+            
+            return combinations;
+        }
+        
+        // 初始化应用
+        init();
+    </script>
+</body>
+</html>
