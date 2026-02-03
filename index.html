@@ -334,6 +334,11 @@
         <!-- 结果部分 -->
         <div class="results-section">
             <h2>符合条件的组合（三个数相加等于2026）</h2>
+            <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+                <input type="text" id="searchNickname" placeholder="输入昵称查找包含该用户的组合" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <button onclick="searchCombinations()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">查找</button>
+                <button onclick="clearSearch()" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">清空</button>
+            </div>
             <div id="results"></div>
         </div>
         
@@ -583,7 +588,7 @@
         }
         
         // 计算结果
-        function calculateResults() {
+        function calculateResults(searchNickname = '') {
             const results = document.getElementById('results');
             results.innerHTML = '';
             
@@ -593,10 +598,21 @@
             }
             
             // 寻找所有三个数相加等于2026的组合
-            const combinations = findCombinations();
+            let combinations = findCombinations();
+            
+            // 如果有搜索昵称，筛选包含该昵称的组合
+            if (searchNickname) {
+                combinations = combinations.filter(combination => 
+                    combination.some(user => user.nickname.toLowerCase().includes(searchNickname.toLowerCase()))
+                );
+            }
             
             if (combinations.length === 0) {
-                results.innerHTML = '<p>没有找到符合条件的组合。</p>';
+                if (searchNickname) {
+                    results.innerHTML = '<p>没有找到包含该用户的符合条件组合。</p>';
+                } else {
+                    results.innerHTML = '<p>没有找到符合条件的组合。</p>';
+                }
                 return;
             }
             
@@ -613,6 +629,20 @@
                 `;
                 results.appendChild(resultItem);
             });
+        }
+        
+        // 搜索组合
+        function searchCombinations() {
+            const searchInput = document.getElementById('searchNickname');
+            const searchNickname = searchInput.value.trim();
+            calculateResults(searchNickname);
+        }
+        
+        // 清空搜索
+        function clearSearch() {
+            const searchInput = document.getElementById('searchNickname');
+            searchInput.value = '';
+            calculateResults();
         }
         
         // 寻找所有三个数相加等于2026的组合
