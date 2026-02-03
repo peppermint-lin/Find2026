@@ -388,9 +388,8 @@
         
         // 更新分享链接
         function updateShareLink() {
-            const dataStr = JSON.stringify(users);
-            const encodedData = encodeURIComponent(dataStr);
-            const shareLink = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
+            // 只使用基础URL作为分享链接
+            const shareLink = `${window.location.origin}${window.location.pathname}`;
             document.getElementById('shareLink').value = shareLink;
         }
         
