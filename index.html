@@ -266,6 +266,11 @@
             }
         }
         
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         /* 响应式设计 */
         @media (max-width: 600px) {
             body {
@@ -293,6 +298,14 @@
 <body>
     <div class="container">
         <h1>2026组合查找器</h1>
+        
+        <!-- 加载中显示 -->
+        <div id="loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+            <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); text-align: center;">
+                <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #4CAF50; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                <p>处理中...</p>
+            </div>
+        </div>
         
         <!-- Token输入部分 -->
         <div class="input-section">
@@ -339,6 +352,15 @@
         const GIST_ID = '74c1c1b591014c5fff3b9b0ffedf9b6d'; // 替换为实际的Gist ID
         let GITHUB_TOKEN = ''; // 从用户输入获取
         const GIST_URL = `https://api.github.com/gists/${GIST_ID}`;
+        
+        // 加载中显示控制函数
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
         
         // 初始化
         async function init() {
@@ -487,8 +509,15 @@
             document.getElementById('nickname').value = '';
             document.getElementById('value').value = '';
             
+            // 显示加载中
+            showLoading();
+            
             // 保存到Gist
             const success = await saveToGist();
+            
+            // 隐藏加载中
+            hideLoading();
+            
             if (success) {
                 // 渲染用户列表
                 renderUsers();
@@ -521,21 +550,34 @@
         
         // 删除用户
         async function removeUser(index) {
-            // 保存要删除的用户，以便在保存失败时恢复
-            const removedUser = users[index];
-            // 从数组中删除用户
-            users.splice(index, 1);
-            
-            // 保存到Gist
-            const success = await saveToGist();
-            if (success) {
-                renderUsers();
-                calculateResults();
-            } else {
-                // 如果保存失败，恢复删除的用户
-                users.splice(index, 0, removedUser);
-                renderUsers();
+            // 显示确认弹窗
+            if (confirm('确定要删除这个用户吗？')) {
+                // 保存要删除的用户，以便在保存失败时恢复
+                const removedUser = users[index];
+                // 从数组中删除用户
+                users.splice(index, 1);
+                
+                // 显示加载中
+                showLoading();
+                
+                // 保存到Gist
+                const success = await saveToGist();
+                
+                // 隐藏加载中
+                hideLoading();
+                
+                if (success) {
+                    renderUsers();
+                    calculateResults();
+                    // 显示删除成功弹窗
+                    alert('删除成功！');
+                } else {
+                    // 如果保存失败，恢复删除的用户
+                    users.splice(index, 0, removedUser);
+                    renderUsers();
+                }
             }
+            // 如果点击取消，不执行任何操作
         }
         
         // 计算结果
